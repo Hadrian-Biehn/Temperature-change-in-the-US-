@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <title>Choropleth_map_ex</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.0/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.7.0/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.4/chroma.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+    
+        html { height:100%;}
+        
+          body {height:100%;padding: 0;
+            margin: 0;
+          }
+                    
+          #map {
+          width: 100%;
+           height: 100%;
+          }
+
+            .info {                      
+            position: absolute;            
+            right: 53px;            
+            top: 430px;            
+            padding: 6px 8px;            
+            font: 16px 'Montserrat', sans-serif;          
+            text-align: right;            
+            background: white;            
+            background: rgba(255, 255, 255, 1);                       
+            opacity: 1; 
+            text-align: center;
+            z-index: 9999;  
+            border-top: 2px solid black;
+            border-radius: 0px; 
+            }        
+
+            .info h1 {            
+            font-size: 16px;            
+            margin: 0 0 5px;            
+            color: #777777;    
+            opacity: 1;  
+            text-align: center;
+            z-index: 9999;
+            }
+
+            /*styling the legend*/
+            .legend {                           
+            position: absolute;              
+            right: 10px;              
+            top: 250px;              
+            padding: 6px 8px;              
+            font: 15px 'Montserrat', sans-serif;              
+            background: white;              
+            background: rgba(255, 255, 255, 1);                               
+            opacity: 1;    
+            z-index: 9997;
+            border-top: 2px solid black;
+            border-radius: 0px; 
+            
+
+            }
+            
+                
+            .legend i {              
+            width: 18px;              
+            height: 16px;              
+            float: left;              
+            margin-right: 8px;              
+            opacity: 1;  
+            z-index: 9997;        
+            }
+
+            info {
+    font-family: 'Montserrat', sans-serif;
+    z-index: 9999;
+}
+
+
+
+.custom-layer-label {
+    padding: 5px 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    color: black;
+    background: #ffffff;
+    text-align: center;
+    z-index: 9997;
+    position: absolute;
+    top: 40px;
+    right: 50px; 
+}
+
+.leaflet-control-layers {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 108px;
+    right: 50px; 
+    color: black;
+}
+
+
+#toggleContainer {
+  position: absolute;
+  top: 75px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  z-index: 9999;
+  max-width: 400px;
+}
+
+#expandText {
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.vertical-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px; 
+  background-color: rgb(146, 146, 146);
+  right: 250px; 
+  z-index: 9999; 
+  opacity: 1;
+}
+
+.white-box {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  width: 250px; 
+  background-color: rgb(255, 255, 255);
+  right: 0px; 
+  z-index: 500; 
+}
+
+.leaflet-control-attribution {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
+  padding: 0.5, 0.5px;
+  border-radius: 5px;
+  z-index: 9999; 
+  position: relative;
+  left: -547px;
+}
+
+#northArrow {
+  position: absolute;
+  bottom: 10px;
+  right: 200px; /* Change to 'right: 10px;' if you want it on the right */
+  z-index: 1000;
+}
+
+#northArrow img {
+  width: 50px; /* adjust size as needed */
+  opacity: 0.9;
+}
+#NOAA {
+  position: absolute;
+  top: 12px;
+  left: 45px; /* Change to 'right: 10px;' if you want it on the right */
+  z-index: 1000;
+}
+
+#NOAA img {
+  width: 60px; /* adjust size as needed */
+  opacity: 1;
+}
+
+/*Scale bar position */
+
+.leaflet-left .leaflet-control-scale {
+  bottom: 25px !important;
+}
+
+#titleContainer {
+  position: absolute;
+  top: 0px;      /* Adjust the distance from the top */
+  right: 0px;    /* Adjust the distance from the right */
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;  /* Set the font size */
+  font-weight: bold; /* Make the title bold */
+  color: #000000;      /* Set the text color */
+  z-index: 9999; 
+  text-align: center;
+  background-color: #ffffff;
+  border: 2px solid #808080;  /* Grey border (2px thickness) */
+  padding: 3px; 
+}
+    </style>
+
+   
+
+
+
+
+
+  </head>
+<body>
+    <div class="vertical-line"></div>
+
+    <div class="white-box"></div>
+
+    <div id="titleContainer">
+      <h1>Extreme Climate Change <br> In The U.S. </h1>
+    </div>
+
+    <div id='map'></div>
+    <div class='legend'></div>
+
+
+    <div id="toggleContainer">
+        <button id="expandBtn">More Info</button>
+        <div id="expandText" class="hidden">
+          <p>
+            <b>Extreme climate change has arrived in America</b> <br> <br>Extreme climate change has already arrived in parts of the United States. 
+            Approximately 1 in 10 Americans, or 34 million people, now live in regions 
+            where average temperatures have risen by at least 2°C (3.6°F) since 1895. 
+            Rhode Island is the first state in the Lower 48 to surpass the 2°C increase.
+             Other northeastern states like New Jersey, Connecticut, Maine, and 
+             Massachusetts are also experiencing rapid warming. In the West, counties 
+             in Oregon, Utah, and Colorado have reached or exceeded this threshold.
+             This is a critical threshold that, if passed, would lead to catastrophic 
+             environmental changes. This includes disruption of food chains and loss 
+             of biodiversity. <br> <br>
+         <a href="https://www.washingtonpost.com/graphics/2019/national/climate-environment/climate-change-america/" target="_blank"><i> Learn more from this article by the Washington Post</i></a>
+
+            </p>
+        </div>
+      </div>
+
+      
+
+    <script>
+      
+
+        // 1. create the map object and the base layer.
+            
+        var map = L.map('map', {
+    center: [37.8, -96],   
+    zoom: 4,               
+    minZoom: 3,            
+    maxZoom: 9,
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+    maxZoom: 9
+}).addTo(map);
+
+         
+        // determine the number of classes and their respective break values.                   
+        var grades = [25, 34.6, 44.2, 53.8, 63.4, 73];
+
+          
+        // now determine the color ramp. The number of colors is determined by the number of classes.             
+        var colors = chroma.scale('Reds').colors(grades.length);
+                  
+        // get the color based on the class of the input value            
+        function getColor(d) {               
+        for (var i = 0; i < grades.length - 1; i++) {                    
+        if ( d > grades[i] && d < grades[i+1] ) return colors[i];                
+        }                
+        if (d > grades[grades.length - 1]) return colors[grades.length];            
+        }
+
+        //determine the style class based on the input feature
+        //note, we are still working in section 2 here
+        function style(feature) {
+                
+                return {                    
+                weight: 2,                    
+                opacity: 1,                    
+                color: 'black',                    
+                dashArray: '5, 1',                    
+                fillOpacity: 0.7,                    
+                fillColor: getColor(feature.properties.density)                
+                };            
+                }
+
+  
+        
+        // 3.1 declare an empty GeoJSON object            
+        var geojson = null;            
+        // then we will continue to work on our event listeners
+    
+        
+             //here's the code for our control, add to section 3.1
+            //paste into the script before section 3.2.1
+            var info = L.control();
+            
+            info.onAdd = function (map) {                
+            this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"                
+            this.update();                
+            return this._div;            
+            };
+            
+                        
+            // method that we will use to update the control based on feature properties passed  
+            // ---Displaying "diff" AKA the temp difference bewteen 1925 and 2025
+            info.update = function (props) {                
+            this._div.innerHTML = '<h4>Temperature Change (1925-2025) </h4>' +  (props ?                    
+            '<b>' + props.name + '</b><br />+' + props.diff + ' &deg;F'                    
+            : 'Hover over a state');   
+                     
+            };
+
+            
+            
+                        
+            info.addTo(map);
+
+        // 3.2.1 highlight a feature when the mouse hovers on it.
+                    
+        function highlightFeature(e) {                
+        // e indicates the current event, we could call it anything                
+        var layer = e.target;                
+        //the target captures the object that the event associates with                
+        layer.setStyle({                    
+        weight: 8,                    
+        opacity: 0.9,                    
+        color: '#e3e3e3',                    
+       // fillColor: 'white',                    
+        fillOpacity: 0.5                
+        });
+                        
+        // then bring the layer to the front.                
+        layer.bringToFront();                
+        // select the update class, and update the contet with the input value.                
+        // remember whenver we call feature.properties, we're looking in the attributes                
+        // for a particular layer - state name and state density, for example                
+        info.update(layer.feature.properties);            
+        }
+
+        // 3.2.2 zoom to the highlighted feature when the mouse clicks it.            
+        function zoomToFeature(e) {                
+        map.fitBounds(e.target.getBounds());            
+        }
+
+        // 3.2.3 reset the hightlighted feature when the mouse is out of its region.            
+        function resetHighlight(e) {
+    if (!e.target.options || !e.target.options.original) {
+        e.target.setStyle(style(e.target.feature));
+    }
+    info.update();
+}
+
+        // now use on each feature option to add listeners on our state layers
+        // 3.3 add these events to the layer object.            
+        function onEachFeature(feature, layer) {                
+        layer.on({                    
+        mouseover: highlightFeature,                    
+        click: zoomToFeature,                    
+        mouseout: resetHighlight                
+        });            
+        }
+
+
+
+
+        //3.4 Add the states GeoJSON layer to the map
+        // 3.4 assign the geojson data path, style option and onEachFeature option. And then Add the geojson layer to the map.            
+     // US Layer 1 (Population Density)
+var usLayer1 = new L.GeoJSON.AJAX("assets/1925.geojson", {
+    style: style,
+    onEachFeature: onEachFeature
+}).addTo(map); 
+
+// US Layer 2 (Second Dataset)
+var usLayer2 = new L.GeoJSON.AJAX("assets/1985.geojson", {
+    style: style,
+    onEachFeature: onEachFeature
+});
+
+// US Layer 3 (2025 Data)
+var usLayer3 = new L.GeoJSON.AJAX("assets/2025.geojson", {
+    style: style,
+    onEachFeature: onEachFeature
+});
+
+
+// Base layers (only one visible at a time)
+var baseLayers = {
+    "1925": usLayer1,
+    "1985": usLayer2,
+    "2025": usLayer3,
+    
+    
+};
+
+
+
+
+// Add control to map
+var layerControl = L.control.layers(baseLayers, null, { collapsed: false }).addTo(map);
+
+// Add custom label above the layer control
+setTimeout(function() {
+    var controlContainer = document.getElementsByClassName('leaflet-control-layers')[0];
+    var label = document.createElement('div');
+    label.className = 'custom-layer-label';
+    label.innerHTML = "<strong>Select Year</strong>";
+    controlContainer.insertBefore(label, controlContainer.firstChild);
+}, 0);
+
+
+// 4. create the legend            
+var labels = [];            
+for (var i = 0; i < grades.length - 1; i++) {                
+    labels.push('<i style="background:' + colors[i] + '"></i> ' + grades[i] + ' - ' + grades[i + 1]);            
+}
+labels.push('<i style="background:' + colors[grades.length - 1] + '"></i> ' + grades[grades.length - 1] + ' +');
+
+// Add a label above the legend entries
+var legendTitle = '<strong style="font-family: Futura, sans-serif;">24-Month Average Temperature <br>   (&deg;F) </strong><br>';
+$(".legend").html(legendTitle + labels.join('<br>'));
+
+// 5. create the credits
+map.attributionControl.addAttribution('Temperature Data &copy; <a href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series/1/tavg/12/7/1897-2025">NOAA</a> | Map created by <strong>Hadrian Biehn</strong>');
+
+        
+
+//expandable text box
+        document.getElementById("expandBtn").addEventListener("click", function () {
+  var textBlock = document.getElementById("expandText");
+  textBlock.classList.toggle("hidden");
+  this.innerText = textBlock.classList.contains("hidden") ? "More Info" : "Less Info";
+});
+
+
+L.control.scale({
+    position: 'bottomright',
+    maxWidth: 200, 
+    metric: true,   
+    imperial: true  
+
+}).addTo(map);
+
+     </script>
+
+
+    <div id="northArrow">
+      <img src="assets/north-arrow.png.png" alt="North Arrow">
+    </div>
+
+    <div id="NOAA">
+      <img src="assets/NOAA.png" alt="NOAA">
+    </div>
+
+
+</body>
+
+</html>
